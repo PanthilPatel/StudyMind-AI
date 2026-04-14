@@ -1,36 +1,66 @@
 /**
- * Supabase Client Configuration
+ * Supabase Client Configuration (Bulletproof Vercel Fix)
  * 
  * Creates and exports a singleton Supabase client instance.
- * Uses environment variables for secure credential management.
- * Gracefully handles missing credentials (app still renders, auth features disabled).
+ * MUST use Vite environment variable syntax for Vercel deployment.
  * 
- * Setup:
- * 1. Create a Supabase project at https://supabase.com
- * 2. Copy your project URL and anon key
- * 3. Add them to your .env file as VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+ * FIXES:
+ * 1. Automatic "Quote & Space Stripping" — Prevent crash if user copies with quotes.
+ * 2. Robust URL checking — ensure it's a valid, trimmed HTTPS URL.
+ * 3. Silent Fallback — If the setup fails, the app returns a "safe" client instead of crashing.
  */
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Helper to clean up variables (removes quotes, spaces, etc.)
+const cleanVar = (val) => {
+  if (typeof val !== 'string') return '';
+  return val.trim().replace(/^["'](.+(?=["']$))["']$/, '$1').trim();
+};
 
-const isConfigured = supabaseUrl && supabaseAnonKey && 
-  supabaseUrl !== 'your_supabase_project_url' &&
-  supabaseAnonKey !== 'your_supabase_anon_key';
+const rawUrl = cleanVar(import.meta.env.VITE_SUPABASE_URL);
+const rawKey = cleanVar(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
-if (!isConfigured) {
-  console.warn(
-    '⚠️ Supabase credentials not found. Auth and database features will be unavailable.\n' +
-    'Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.'
+// Debug Log (Visible in Browser Console)
+console.log("Supabase URL Check:", rawUrl ? "Present (checking validity...)" : "Missing");
+
+const isValidUrl = (url) => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
+
+const isConfigured = isValidUrl(rawUrl) && rawKey.length > 20;
+
+if (!isConfigured && rawUrl) {
+  console.error(
+    "SUPABASE CONFIG ERROR: The URL provided is invalid or the Key is too short.\n" +
+    "URL Received:", `"${rawUrl}"`
   );
 }
 
-// Create client with real or placeholder URL (placeholder won't connect but won't crash)
-export const supabase = createClient(
-  isConfigured ? supabaseUrl : 'https://placeholder.supabase.co',
-  isConfigured ? supabaseAnonKey : 'placeholder-key'
-);
+// Fallback values to prevent "Invalid supabaseUrl" crash
+const supabaseUrl = isConfigured ? rawUrl : 'https://placeholder-project.supabase.co';
+const supabaseKey = isConfigured ? rawKey : 'placeholder-anon-key';
 
+let client;
+try {
+  client = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  });
+} catch (err) {
+  console.error("CRITICAL: Supabase client constructor failed!", err);
+  // Last resort: initialize with dummy values that definitely won't throw
+  client = createClient('https://placeholder.supabase.co', 'placeholder');
+}
+
+export const supabase = client;
 export const isSupabaseConfigured = isConfigured;
+export const configDetails = { url: rawUrl, isConfigured }; // Exported for debug
