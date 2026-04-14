@@ -1,0 +1,165 @@
+/* ============================================
+   Navbar Styles — Indigo Spatial Minimalism
+   ============================================ */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: var(--header-height);
+  background: rgba(2, 6, 23, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.navbar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+  opacity: 0.5;
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
+  transition: opacity var(--transition-base);
+}
+
+.logo-icon {
+  font-size: 1.5rem;
+  color: var(--color-accent);
+  text-shadow: 0 0 12px var(--color-accent-glow);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+/* Elite Theme Toggle Pill */
+.theme-toggle {
+  cursor: pointer;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 20px;
+  width: 32px;
+  height: 54px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-glass-border-bright);
+}
+
+.theme-toggle-pill {
+  width: 24px;
+  height: 24px;
+  background: var(--color-accent-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px var(--color-accent-glow);
+  transition: transform 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+}
+
+.theme-toggle-pill.light {
+  transform: translateY(22px);
+}
+
+.theme-toggle-pill.dark {
+  transform: translateY(0);
+}
+
+.theme-icon {
+  font-size: 14px;
+  user-select: none;
+}
+
+/* Mobile Toggle - Taller Hamburger */
+.navbar-toggle {
+  display: none;
+  padding: var(--space-2);
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 22px;
+}
+
+.hamburger span {
+  display: block;
+  height: 2px;
+  background: var(--color-text-primary);
+  border-radius: 2px;
+  transition: var(--transition-base);
+}
+
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* Mobile Overlay Refined */
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-actions {
+    position: fixed;
+    top: var(--header-height);
+    left: var(--space-4);
+    right: var(--space-4);
+    background: var(--color-glass-bright);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--color-glass-border);
+    border-radius: var(--radius-lg);
+    flex-direction: column;
+    padding: var(--space-8) var(--space-4);
+    gap: var(--space-4);
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition-base);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+
+  .navbar-actions.mobile-open {
+    transform: translateY(12px);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .navbar-actions .btn {
+    width: 100%;
+  }
+}
